@@ -113,9 +113,6 @@ class OpenPortEvent(Event):
             location = str(self.port)
         return location
 
-class HuntFinished(Event):
+class HuntReported(Event):
     pass
 
-
-class HuntStarted(Event):
-    pass
