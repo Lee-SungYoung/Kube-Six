@@ -2,18 +2,55 @@ from __future__ import print_function
 
 from prettytable import ALL, PrettyTable
 
-from __main__ import config
 from .collector import services, vulnerabilities, hunters, handler, services_lock, vulnerabilities_lock
-from .base import BaseReporter
-
+import logging
 EVIDENCE_PREVIEW = 40
 MAX_TABLE_WIDTH = 20
 
+class BaseReporter(object):
+    def get_nodes(self):
+        nodes = list()
+        node_locations = set()
+        services_lock.acquire()
+        for service in services:
+            node_location = str(service.host)
+            if node_location not in node_locations:
+                nodes.append({"type": "Node/Master", "location": str(service.host)})
+                node_locations.add(node_location)
+        services_lock.release()
+        return nodes
+
+    def get_services(self):
+        services_lock.acquire()
+        services_data = [{"service": service.get_name(),
+                 "location": "{}:{}{}".format(service.host, service.port, service.get_path()),
+                 "description": service.explain()}
+                for service in services]
+        services_lock.release()
+        return services_data
+
+    def get_vulnerabilities(self):
+        vulnerabilities_lock.acquire()
+        vulnerabilities_data = [{"location": vuln.location(),
+                 "category": vuln.category.name,
+                 "severity": vuln.get_severity(),
+                 "vulnerability": vuln.get_name(),
+                 "description": vuln.explain(),
+                 "version": str(vuln.evidence)}
+                for vuln in vulnerabilities]
+        vulnerabilities_lock.release()
+        return vulnerabilities_data
+
+    def get_hunter_statistics(self):
+        hunters_data = list()
+        for hunter, docs in hunters.items():
+            if not Discovery in hunter.__mro__:
+                name, doc = hunter.parse_docs(docs)
+                hunters_data.append({"name": name, "description": doc, "vulnerabilities": hunter.publishedVulnerabilities})
+        return hunters_data
 
 class PlainReporter(BaseReporter):
-
     def get_report(self):
-        """generates report tables"""
         output = ""
 
         vulnerabilities_lock.acquire()
@@ -28,20 +65,13 @@ class PlainReporter(BaseReporter):
 
         if services_len:
             output += self.nodes_table()
-            if not config.mapping:
-                output += self.services_table()
-                if vulnerabilities_len:
-                    output += self.vulns_table()
-                else:
-                    output += "\nNo vulnerabilities were found"
-                if config.statistics:
-                    if hunters_len:
-                        output += self.hunters_table()
-                    else:
-                        output += "\nNo hunters were found"
+            output += self.services_table()
+            if vulnerabilities_len:
+                output += self.vulns_table()
+            else:
+                output += "\nNo vulnerabilities were found"
         else:
             print("\nKube Hunter couldn't find any clusters")
-            # print("\nKube Hunter couldn't find any clusters. {}".format("Maybe try with --active?" if not config.active else ""))
         return output
 
     def nodes_table(self):
@@ -52,7 +82,6 @@ class PlainReporter(BaseReporter):
         nodes_table.sortby = "Type"
         nodes_table.reversesort = True
         nodes_table.header_style = "upper"
-        # TODO: replace with sets
         id_memory = list()
         services_lock.acquire()
         for service in services:
@@ -64,7 +93,7 @@ class PlainReporter(BaseReporter):
         return nodes_ret
 
     def services_table(self):
-        services_table = PrettyTable(["Service", "Location", "Description"], hrules=ALL)
+        services_table = PrettyTable(["Service", "Location"], hrules=ALL)
         services_table.align = "l"
         services_table.max_width = MAX_TABLE_WIDTH
         services_table.padding_width = 1
@@ -73,7 +102,7 @@ class PlainReporter(BaseReporter):
         services_table.header_style = "upper"
         services_lock.acquire()
         for service in services:
-            services_table.add_row([service.get_name(), "{}:{}{}".format(service.host, service.port, service.get_path()), service.explain()])
+            services_table.add_row([service.get_name(), "{}:{}{}".format(service.host, service.port, service.get_path())])
         detected_services_ret = "\nDetected Services\n{}\n".format(services_table)
         services_lock.release()
         return detected_services_ret
@@ -97,17 +126,3 @@ class PlainReporter(BaseReporter):
         vulnerabilities_lock.release()
         return "\nVulnerabilities\n{}\n".format(vuln_table)
 
-    def hunters_table(self):
-        column_names = ["Name", "Description", "Vulnerabilities"]
-        hunters_table = PrettyTable(column_names, hrules=ALL)
-        hunters_table.align = "l"
-        hunters_table.max_width = MAX_TABLE_WIDTH
-        hunters_table.sortby = "Name"
-        hunters_table.reversesort = True
-        hunters_table.padding_width = 1
-        hunters_table.header_style = "upper"
-
-        hunter_statistics = self.get_hunter_statistics()
-        for item in hunter_statistics:
-            hunters_table.add_row([item.get("name"), item.get("description"), item.get("vulnerabilities")])
-        return "\nHunter Statistics\n{}\n".format(hunters_table)

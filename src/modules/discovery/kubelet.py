@@ -7,17 +7,10 @@ import requests
 import urllib3
 
 from ...core.events import handler
-from ...core.events.types import OpenPortEvent, Vulnerability, Event, Service
+from ...core.events.common import OpenPortEvent, Vulnerability, Event, Service
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-""" Services """
-class ReadOnlyKubeletEvent(Service, Event):
-    """The read-only port on the kubelet serves health probing endpoints, and is relied upon by many kubernetes componenets"""
-    def __init__(self):
-        Service.__init__(self, name="Kubelet API (readonly)")
-
 class SecureKubeletEvent(Service, Event):
-    """The Kubelet is the main component in every Node, all pod operations goes through the kubelet"""
     def __init__(self, cert=False, token=False, anonymous_auth=True, **kwargs):
         self.cert = cert
         self.token = token
@@ -31,18 +24,8 @@ class KubeletPorts(Enum):
 
 @handler.subscribe(OpenPortEvent, predicate= lambda x: x.port == 10255 or x.port == 10250)
 class KubeletDiscovery(Discovery):
-    """Kubelet Discovery
-    Checks for the existence of a Kubelet service, and its open ports
-    """
     def __init__(self, event):
         self.event = event
-
-    def get_read_only_access(self):
-        logging.debug(self.event.host)
-        logging.debug("Passive hunter is attempting to get kubelet read access")
-        r = requests.get("http://{host}:{port}/pods".format(host=self.event.host, port=self.event.port))
-        if r.status_code == 200:
-            self.publish_event(ReadOnlyKubeletEvent())
 
     def get_secure_access(self):
         logging.debug("Attempting to get kubelet secure access")

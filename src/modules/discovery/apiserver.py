@@ -3,7 +3,7 @@ import logging
 
 from ...core.types import Discovery
 from ...core.events import handler
-from ...core.events.types import OpenPortEvent, Service, Event
+from ...core.events.common import OpenPortEvent, Service, Event
 
 
 class ApiServer(Service, Event):
@@ -12,8 +12,6 @@ class ApiServer(Service, Event):
         Service.__init__(self, name="API Server")
 
 
-# Other devices could have this port open, but we can check to see if it looks like a Kubernetes node
-# A Kubernetes API server will respond with a JSON message that includes a "code" field for the HTTP status code
 @handler.subscribe(OpenPortEvent, predicate=lambda x: x.port==443 or x.port==6443)
 class ApiServerDiscovery(Discovery):
     """Api Server Discovery

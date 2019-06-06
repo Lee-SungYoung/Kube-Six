@@ -9,7 +9,6 @@ class Event(object):
     def __init__(self):
         self.previous = None
 
-    # newest attribute gets selected first
     def __getattr__(self, name):
         if name == "previous":
             return None
@@ -17,18 +16,12 @@ class Event(object):
             if name in event.__dict__:
                 return event.__dict__[name]
 
-    # Event's logical location to be used mainly for reports.
-    # If event don't implement it check previous event
-    # This is because events are composed (previous -> previous ...)
-    # and not inheritted 
     def location(self):
         location = None
         if self.previous:
             location = self.previous.location()
-
         return location
 
-    # returns the event history ordered from newest to oldest
     @property
     def history(self):
         previous, history = self.previous, list()
@@ -36,10 +29,6 @@ class Event(object):
             history.append(previous)
             previous = previous.previous
         return history
-
-
-""" Event Types """
-# TODO: make proof an abstract method.
 
 
 class Service(object):
@@ -94,9 +83,6 @@ global event_id_count_lock
 event_id_count_lock = threading.Lock()
 event_id_count = 0
 
-""" Discovery/Hunting Events """
-
-
 class NewHostEvent(Event):
     def __init__(self, host, cloud=None):
         global event_id_count
@@ -110,7 +96,6 @@ class NewHostEvent(Event):
     def __str__(self):
         return str(self.host)
     
-    # Event's logical location to be used mainly for reports.
     def location(self):
         return str(self.host)
 
@@ -121,7 +106,6 @@ class OpenPortEvent(Event):
     def __str__(self):
         return str(self.port)
     
-    # Event's logical location to be used mainly for reports.
     def location(self):
         if self.host:
             location = str(self.host) + ":" + str(self.port)

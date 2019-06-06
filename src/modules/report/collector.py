@@ -1,10 +1,9 @@
 import logging
 
-from __main__ import config
+import __main__ 
 from src.core.events import handler
-from src.core.events.types import Event, Service, Vulnerability, HuntFinished, HuntStarted
+from src.core.events.common import Event, Service, Vulnerability, HuntFinished, HuntStarted
 import threading
-
 
 global services_lock
 services_lock = threading.Lock()
@@ -44,7 +43,6 @@ class Collector(object):
         self.event = event
 
     def execute(self):
-        """function is called only when collecting data"""
         global services
         global vulnerabilities
         bases = self.event.__class__.__mro__
@@ -52,25 +50,11 @@ class Collector(object):
             services_lock.acquire()
             services.append(self.event)
             services_lock.release()
-            import datetime
-            logging.info("|\n| {name}:\n|   type: open service\n|   service: {name}\n|_  host: {host}:{port}".format(
-                host=self.event.host,
-                port=self.event.port,
-                name=self.event.get_name(),
-                time=datetime.time()
-            ))
 
         elif Vulnerability in bases:
             vulnerabilities_lock.acquire()
             vulnerabilities.append(self.event)
             vulnerabilities_lock.release()
-            logging.info(
-                "|\n| {name}:\n|   type: vulnerability\n|   host: {host}:{port}\n|   description: \n{desc}".format(
-                    name=self.event.get_name(),
-                    host=self.event.host,
-                    port=self.event.port,
-                    desc=wrap_last_line(console_trim(self.event.explain(), '|     '))
-                ))
 
 
 class TablesPrinted(Event):
@@ -83,11 +67,8 @@ class SendFullReport(object):
         self.event = event
 
     def execute(self):
-        report = config.reporter.get_report()
-        if config.report == "plain":
-            logging.info("\n{div}\n{report}".format(div="-" * 10, report=report))
-        else:
-            print(report)
+        report = __main__.reporter.get_report()
+        logging.info("\n{div}\n{report}".format(div="-" * 10, report=report))
         handler.publish_event(TablesPrinted())
 
 
@@ -97,5 +78,4 @@ class StartedInfo(object):
         self.event = event
 
     def execute(self):
-        logging.info("~ Started")
-        logging.info("~ Discovering Open Kubernetes Services...")
+        return

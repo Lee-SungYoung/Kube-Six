@@ -5,17 +5,14 @@ from collections import defaultdict
 from queue import Queue
 from threading import Lock, Thread
 
-from __main__ import config
-
 from ..types import ActiveHunter, Hunter, HunterBase
 
-from ...core.events.types import HuntFinished, Vulnerability
+from ...core.events.common import HuntFinished, Vulnerability
 import threading
 
 global queue_lock
 queue_lock = Lock()
 
-# Inherits Queue object, handles events asynchronously
 class EventQueue(Queue, object):
     def __init__(self, num_worker=10):
         super(EventQueue, self).__init__()
@@ -36,7 +33,6 @@ class EventQueue(Queue, object):
         t.daemon = True
         t.start()
 
-    # decorator wrapping for easy subscription
     def subscribe(self, event, hook=None, predicate=None):
         def wrapper(hook):
             self.subscribe_event(event, hook=hook, predicate=predicate)
@@ -44,13 +40,10 @@ class EventQueue(Queue, object):
 
         return wrapper
 
-    # getting uninstantiated event object
     def subscribe_event(self, event, hook=None, predicate=None):
         if ActiveHunter in hook.__mro__:
-            if not config.active:
-                return
-            else:
-                self.active_hunters[hook] = hook.__doc__
+            return
+
         elif HunterBase in hook.__mro__:
             self.passive_hunters[hook] = hook.__doc__
 
@@ -61,7 +54,6 @@ class EventQueue(Queue, object):
             self.hooks[event].append((hook, predicate))
             logging.debug('{} subscribed to {}'.format(hook, event))
 
-    # getting instantiated event object
     def publish_event(self, event, caller=None):
         logging.debug('Event {} got published with {}'.format(event.__class__, event))
         for hooked_event in self.hooks.keys():
@@ -73,13 +65,8 @@ class EventQueue(Queue, object):
                     if caller:
                         event.previous = caller.event
 
-                    if config.statistics and caller:
-                        if Vulnerability in event.__class__.__mro__:
-                            caller.__class__.publishedVulnerabilities += 1
-
                     self.put(hook(event))
 
-    # executes callbacks on dedicated thread as a daemon
     def worker(self):
         while self.running:
             queue_lock.acquire()
@@ -98,7 +85,6 @@ class EventQueue(Queue, object):
             logging.debug("{} tasks left".format(self.unfinished_tasks))
             time.sleep(3)
 
-    # stops execution of all daemons
     def free(self):
         self.running = False
         with self.mutex:

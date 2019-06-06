@@ -4,7 +4,7 @@ from socket import socket
 from ...core.types import Discovery
 
 from ...core.events import handler
-from ...core.events.types import NewHostEvent, OpenPortEvent
+from ...core.events.common import NewHostEvent, OpenPortEvent
 
 
 default_ports = [8001, 10250, 10255, 30000, 443, 6443, 2379]

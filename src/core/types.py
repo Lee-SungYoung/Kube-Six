@@ -1,18 +1,9 @@
+import logging
+
 class HunterBase(object):
     publishedVulnerabilities = 0
-
     def publish_event(self, event):
         handler.publish_event(event, caller=self)
-
-    def parse_docs(docs):
-        """returns tuple of (name, docs)"""
-        if not docs:
-            return __name__, "<no documentation>"
-        docs = docs.strip().split('\n')
-        for i, line in enumerate(docs):
-            docs[i] = line.strip()
-        return docs[0], ' '.join(docs[1:]) if len(docs[1:]) else "<no documentation>"
-        
 
 class ActiveHunter(HunterBase):
     pass
@@ -26,23 +17,20 @@ class Discovery(HunterBase):
     pass
 
 
-"""Kubernetes Components"""
 class KubernetesCluster():
     """Kubernetes Cluster"""
     name = "Kubernetes Cluster"
 
 
 class Kubelet(KubernetesCluster):
-    """The kubelet is the primary "node agent" that runs on each node"""
+    """Kubelet"""
     name = "Kubelet"
 
 
 class Azure(KubernetesCluster):
-    """Azure Cluster"""
     name = "Azure"
 
 
-""" Categories """
 class InformationDisclosure(object):
     name = "Information Disclosure"
 

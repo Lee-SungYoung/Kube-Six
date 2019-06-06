@@ -5,7 +5,7 @@ import uuid
 import ast
 
 from ...core.events import handler
-from ...core.events.types import Vulnerability, Event
+from ...core.events.common import Vulnerability, Event
 from ..discovery.apiserver import ApiServer
 from ...core.types import Hunter, ActiveHunter, KubernetesCluster, RemoteCodeExec, AccessRisk, InformationDisclosure, \
     PrivilegeEscalation, DenialOfService
@@ -14,28 +14,22 @@ from ...core.types import Hunter, ActiveHunter, KubernetesCluster, RemoteCodeExe
 
 
 class ServerApiVersionEndPointAccessPE(Vulnerability, Event):
-    """Node is vulnerable to critical CVE-2018-1002105"""
-
+    """CVE-2018-1002105"""
     def __init__(self, evidence):
         Vulnerability.__init__(self, KubernetesCluster, name="Critical Privilege Escalation CVE", category=PrivilegeEscalation)
         self.evidence = evidence
 
 
 class ServerApiVersionEndPointAccessDos(Vulnerability, Event):
-    """Node not patched for CVE-2019-1002100. Depending on your RBAC settings, a crafted json-patch could cause a Denial of Service."""
-
+    """CVE-2019-1002100"""
     def __init__(self, evidence):
         Vulnerability.__init__(self, KubernetesCluster, name="Denial of Service to Kubernetes API Server", category=DenialOfService)
         self.evidence = evidence
 
 
-# Passive Hunter
 @handler.subscribe(ApiServer)
 class IsVulnerableToCVEAttack(Hunter):
-    """CVE-2018-1002105 hunter
-    Checks if Node is running a Kubernetes version vulnerable to critical CVE-2018-1002105
-    """
-
+    """CVE-2018-1002105"""
     def __init__(self, event):
         self.event = event
         self.headers = dict()
@@ -88,7 +82,6 @@ class IsVulnerableToCVEAttack(Hunter):
         Kubernetes v1.12.0-1.12.5 (fixed in v1.12.6)
         Kubernetes v1.13.0-1.13.3 (fixed in v1.13.4)
         """
-
         first_two_minor_digists = api_version[0]
         last_two_minor_digists = api_version[1]
 
