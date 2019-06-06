@@ -2,7 +2,7 @@ import logging
 
 import __main__ 
 from src.core.events import handler
-from src.core.events.common import Event, Service, Vulnerability, HuntFinished
+from src.core.events.common import Event, Service, Vulnerability, HuntReported
 import threading
 
 global services_lock
@@ -36,7 +36,7 @@ class Collector(object):
             vulnerabilities_lock.release()
 
 
-@handler.subscribe(HuntFinished)
+@handler.subscribe(HuntReported)
 class SendFullReport(object):
     def __init__(self, event):
         self.event = event
