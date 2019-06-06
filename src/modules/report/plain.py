@@ -2,7 +2,7 @@ from __future__ import print_function
 
 from prettytable import ALL, PrettyTable
 
-from .collector import services, vulnerabilities, handler, services_lock, vulnerabilities_lock
+from .collector import services, hunters, vulnerabilities, handler, services_lock, vulnerabilities_lock
 import logging
 EVIDENCE_PREVIEW = 40
 MAX_TABLE_WIDTH = 20
