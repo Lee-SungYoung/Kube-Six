@@ -29,13 +29,6 @@ def console_trim(text, prefix=' '):
             total_length += len(value) + len(prefix)
     return '\n'.join([prefix + line.strip(' ') for line in ' '.join(b).split('\n')])
 
-
-def wrap_last_line(text, prefix='| ', suffix='|_'):
-    lines = text.split('\n')
-    lines[-1] = lines[-1].replace(prefix, suffix, 1)
-    return '\n'.join(lines)
-
-
 @handler.subscribe(Service)
 @handler.subscribe(Vulnerability)
 class Collector(object):
