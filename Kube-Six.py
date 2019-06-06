@@ -17,7 +17,7 @@ from src.modules.report.plain import PlainReporter
 reporter = PlainReporter()
 
 from src.core.events import handler
-from src.core.events.common import HuntFinished
+from src.core.events.common import HuntReported
 from src.modules.discovery.hosts import HostScanEvent
 from src.modules.hunting.kubelet import Kubelet
 from src.modules.discovery.apiserver import ApiServerDiscovery
@@ -53,7 +53,7 @@ def main():
         hunt_started_lock.acquire()
         if hunt_started:
             hunt_started_lock.release()
-            handler.publish_event(HuntFinished())
+            handler.publish_event(HuntReported())
             handler.join()
             handler.free()
             logging.debug("Cleaned Queue")
