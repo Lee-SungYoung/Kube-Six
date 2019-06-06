@@ -13,6 +13,7 @@ global vulnerabilities_lock
 vulnerabilities_lock = threading.Lock()
 vulnerabilities = list()
 
+hunters = handler.all_hunters
 
 @handler.subscribe(Service)
 @handler.subscribe(Vulnerability)
