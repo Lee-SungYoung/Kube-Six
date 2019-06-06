@@ -36,10 +36,6 @@ class Collector(object):
             vulnerabilities_lock.release()
 
 
-class TablesPrinted(Event):
-    pass
-
-
 @handler.subscribe(HuntFinished)
 class SendFullReport(object):
     def __init__(self, event):
@@ -48,7 +44,6 @@ class SendFullReport(object):
     def execute(self):
         report = __main__.reporter.get_report()
         logging.info("\n{div}\n{report}".format(div="-" * 10, report=report))
-        handler.publish_event(TablesPrinted())
 
 
 @handler.subscribe(HuntStarted)
