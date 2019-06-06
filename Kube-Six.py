@@ -17,7 +17,7 @@ from src.modules.report.plain import PlainReporter
 reporter = PlainReporter()
 
 from src.core.events import handler
-from src.core.events.common import HuntFinished, HuntStarted
+from src.core.events.common import HuntFinished
 from src.modules.discovery.hosts import HostScanEvent
 from src.modules.hunting.kubelet import Kubelet
 from src.modules.discovery.apiserver import ApiServerDiscovery
@@ -42,10 +42,9 @@ def main():
         hunt_started = True
         hunt_started_lock.release()
 
-        handler.publish_event(HuntStarted())
         handler.publish_event(HostScanEvent())
-        
         handler.join()
+        
     except KeyboardInterrupt:
         logging.debug("Kube-Hunter stopped by user")
     except EOFError:
