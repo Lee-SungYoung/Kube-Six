@@ -7,7 +7,7 @@ from threading import Lock, Thread
 
 from ..types import ActiveHunter, Hunter, HunterBase
 
-from ...core.events.common import HuntFinished, Vulnerability
+from ...core.events.common import HuntReported, Vulnerability
 import threading
 
 global queue_lock
