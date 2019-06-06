@@ -13,21 +13,6 @@ global vulnerabilities_lock
 vulnerabilities_lock = threading.Lock()
 vulnerabilities = list()
 
-hunters = handler.all_hunters
-
-def console_trim(text, prefix=' '):
-    a = text.split(" ")
-    b = a[:]
-    total_length = 0
-    count_of_inserts = 0
-    for index, value in enumerate(a):
-        if (total_length + (len(value) + len(prefix))) >= 80:
-            b.insert(index + count_of_inserts, '\n')
-            count_of_inserts += 1
-            total_length = 0
-        else:
-            total_length += len(value) + len(prefix)
-    return '\n'.join([prefix + line.strip(' ') for line in ' '.join(b).split('\n')])
 
 @handler.subscribe(Service)
 @handler.subscribe(Vulnerability)
