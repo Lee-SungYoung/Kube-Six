@@ -2,7 +2,7 @@ import logging
 
 import __main__ 
 from src.core.events import handler
-from src.core.events.common import Event, Service, Vulnerability, HuntFinished, HuntStarted
+from src.core.events.common import Event, Service, Vulnerability, HuntFinished
 import threading
 
 global services_lock
@@ -45,11 +45,3 @@ class SendFullReport(object):
         report = __main__.reporter.get_report()
         logging.info("\n{div}\n{report}".format(div="-" * 10, report=report))
 
-
-@handler.subscribe(HuntStarted)
-class StartedInfo(object):
-    def __init__(self, event):
-        self.event = event
-
-    def execute(self):
-        return
