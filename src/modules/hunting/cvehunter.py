@@ -3,7 +3,7 @@ import json
 import requests
 import uuid
 import ast
-
+import subprocess
 from ...core.events import handler
 from ...core.events.common import Vulnerability, Event
 from ..discovery.apiserver import ApiServer
@@ -11,7 +11,6 @@ from ...core.types import Hunter, ActiveHunter, KubernetesCluster, RemoteCodeExe
     PrivilegeEscalation, DenialOfService
 
 """ Vulnerabilities """
-
 
 class ServerApiVersionEndPointAccessPE(Vulnerability, Event):
     """CVE-2018-1002105"""
@@ -25,6 +24,12 @@ class ServerApiVersionEndPointAccessDos(Vulnerability, Event):
     def __init__(self, evidence):
         Vulnerability.__init__(self, KubernetesCluster, name="Denial of Service to Kubernetes API Server", category=DenialOfService)
         self.evidence = evidence
+
+class CheckCVE20191002101(Vulnerability, Event):
+    """CVE-2019-1002101"""
+    def __init__(self,evidence):
+        Vulnerability.__init__(self, KubernetesCluster, name="lead to command line argument injection", category=RemoteCodeExec)
+        self.evidence = "hash"
 
 
 @handler.subscribe(ApiServer)
@@ -76,12 +81,6 @@ class IsVulnerableToCVEAttack(Hunter):
         return False
 
     def check_cve_2019_1002100(self, api_version):
-        """
-        Kubernetes v1.0.x-1.10.x
-        Kubernetes v1.11.0-1.11.7 (fixed in v1.11.8)
-        Kubernetes v1.12.0-1.12.5 (fixed in v1.12.6)
-        Kubernetes v1.13.0-1.13.3 (fixed in v1.13.4)
-        """
         first_two_minor_digists = api_version[0]
         last_two_minor_digists = api_version[1]
 
@@ -96,14 +95,24 @@ class IsVulnerableToCVEAttack(Hunter):
 
         return False
 
+    def check_cve_2019_1002101(self):
+	tar_cmd = subprocess.check_output('kubectl exec myapp-pod -it md5sum /bin/tar',shell=True)
+	tar_hash = tar_cmd.split(' ')
+    	tar_org = 'ac32e3bd35515eab8f9cb5caab289b11'
+    	if tar_org == tar_hash[0]:
+    		return False
+    	else:
+    		return True
+
+        return False
     def execute(self):
         api_version = self.get_api_server_version_end_point()
 
         if api_version:
             if self.check_cve_2018_1002105(api_version):
                 self.publish_event(ServerApiVersionEndPointAccessPE(self.api_server_evidence))
-
             if self.check_cve_2019_1002100(api_version):
                 self.publish_event(ServerApiVersionEndPointAccessDos(self.api_server_evidence))
-
+            if self.check_cve_2019_1002101():
+            	self.publish_event(CheckCVE20191002101(self.api_server_evidence))
 
