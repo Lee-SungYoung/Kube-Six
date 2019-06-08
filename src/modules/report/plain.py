@@ -88,7 +88,7 @@ class PlainReporter(BaseReporter):
             if service.event_id not in id_memory:
                 nodes_table.add_row(["Node/Master", service.host])
                 id_memory.append(service.event_id)
-        nodes_ret = "\nNodes\n{}\n".format(nodes_table)
+        nodes_ret = "\n\nNodes\n{}\n".format(nodes_table)
         services_lock.release()
         return nodes_ret
 
@@ -120,9 +120,8 @@ class PlainReporter(BaseReporter):
         vulnerabilities_lock.acquire()
         for vuln in vulnerabilities:
             row = [vuln.location(), vuln.category.name, vuln.get_name(), vuln.explain()]
-            evidence = str(vuln.evidence)[:EVIDENCE_PREVIEW] + "..." if len(str(vuln.evidence)) > EVIDENCE_PREVIEW else str(vuln.evidence)
+            evidence = str(vuln.evidence) #if len(str(vuln.evidence)) > EVIDENCE_PREVIEW else str(vuln.evidence)
             row.append(evidence)
             vuln_table.add_row(row)
         vulnerabilities_lock.release()
         return "\nVulnerabilities\n{}\n".format(vuln_table)
-
