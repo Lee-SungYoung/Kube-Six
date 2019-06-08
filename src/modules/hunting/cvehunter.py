@@ -1,3 +1,4 @@
+import threading
 import logging
 import json
 import requests
@@ -11,25 +12,31 @@ from ...core.types import Hunter, ActiveHunter, KubernetesCluster, RemoteCodeExe
     PrivilegeEscalation, DenialOfService
 
 """ Vulnerabilities """
+global final_pods
+final_pods = ''
+global check_lock
+check_lock = threading.Lock()
+global check
+check=0
 
 class ServerApiVersionEndPointAccessPE(Vulnerability, Event):
     """CVE-2018-1002105"""
     def __init__(self, evidence):
         Vulnerability.__init__(self, KubernetesCluster, name="Critical Privilege Escalation CVE", category=PrivilegeEscalation)
-        self.evidence = evidence
+        self.evidence = evidence[37:60]
 
 
 class ServerApiVersionEndPointAccessDos(Vulnerability, Event):
     """CVE-2019-1002100"""
     def __init__(self, evidence):
         Vulnerability.__init__(self, KubernetesCluster, name="Denial of Service to Kubernetes API Server", category=DenialOfService)
-        self.evidence = evidence
+        self.evidence = evidence[37:60]
 
 class CheckCVE20191002101(Vulnerability, Event):
     """CVE-2019-1002101"""
     def __init__(self,evidence):
         Vulnerability.__init__(self, KubernetesCluster, name="lead to command line argument injection", category=RemoteCodeExec)
-        self.evidence = "hash"
+        self.evidence = "* vulnerable pods * \n" + evidence
 
 
 @handler.subscribe(ApiServer)
@@ -96,23 +103,44 @@ class IsVulnerableToCVEAttack(Hunter):
         return False
 
     def check_cve_2019_1002101(self):
-	tar_cmd = subprocess.check_output('kubectl exec myapp-pod -it md5sum /bin/tar',shell=True)
-	tar_hash = tar_cmd.split(' ')
-    	tar_org = 'ac32e3bd35515eab8f9cb5caab289b11'
-    	if tar_org == tar_hash[0]:
-    		return False
-    	else:
-    		return True
+        pods = subprocess.check_output('kubectl get pods',shell=True)
+        pods = pods.split('\n')
+        check_lock.acquire()
+        global final_pods
+        global check
+        for i in range(1, len(pods)-1):
+            pod = pods[i][:14]
+            pod=pod.split(' ')[0]
+            cmd = 'kubectl exec '
+            cmd += pod
+            cmd += ' -it md5sum /bin/tar'
+            tar_cmd = subprocess.check_output(cmd,shell=True)
+            tar_hash = tar_cmd.split(' ')[0]
+            tar_org = 'ac32e3bd35515eab8f9cb5caab289b11'
+    	    if tar_org == tar_hash:
+                print("same")
+            else:
+                final_pods += pod
+                final_pods += '\n'
+                check = check +1
+                
+        if check != 0:
+            check = 0
+            check_lock.release()
+            return True
+        else:
+            check_lock.release()
+            return False
 
-        return False
     def execute(self):
         api_version = self.get_api_server_version_end_point()
-
+        global final_pods
         if api_version:
             if self.check_cve_2018_1002105(api_version):
                 self.publish_event(ServerApiVersionEndPointAccessPE(self.api_server_evidence))
             if self.check_cve_2019_1002100(api_version):
                 self.publish_event(ServerApiVersionEndPointAccessDos(self.api_server_evidence))
             if self.check_cve_2019_1002101():
-            	self.publish_event(CheckCVE20191002101(self.api_server_evidence))
+            	self.publish_event(CheckCVE20191002101(final_pods))
+                final_pods = ''
 
