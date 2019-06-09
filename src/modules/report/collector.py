@@ -35,7 +35,6 @@ class Collector(object):
             vulnerabilities.append(self.event)
             vulnerabilities_lock.release()
 
-
 @handler.subscribe(HuntReported)
 class SendFullReport(object):
     def __init__(self, event):
@@ -44,4 +43,5 @@ class SendFullReport(object):
     def execute(self):
         report = __main__.reporter.get_report()
         logging.info("\n{div}\n{report}".format(div="-" * 10, report=report))
+        __main__.reporter.send_data()
 
