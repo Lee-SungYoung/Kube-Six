@@ -1,8 +1,10 @@
 from __future__ import print_function
+import json
 
 from prettytable import ALL, PrettyTable
-
+import __main__
 from .collector import services, hunters, vulnerabilities, handler, services_lock, vulnerabilities_lock
+import requests
 import logging
 EVIDENCE_PREVIEW = 40
 MAX_TABLE_WIDTH = 20
@@ -125,3 +127,29 @@ class PlainReporter(BaseReporter):
             vuln_table.add_row(row)
         vulnerabilities_lock.release()
         return "\nVulnerabilities\n{}\n".format(vuln_table)
+
+    def send_data(self):
+        global USER_TOKEN
+        URL = "http://hotsix.kro.kr/re_result.php"
+        services_lock.acquire()
+        USER_TOKEN = 'test'
+        for service in services:
+            node_data = "{'chk' : '1', 'token' : '%s', 'Type_1' : 'Node/Master', 'Location_1' : '%s'}" %(USER_TOKEN, service.host)
+            res = requests.post(URL, data=node_data)
+#            print(node_data)
+        for service in services:
+            service_data = "{'chk' : '2', 'token' : '%s', 'Service_2' : '%s', 'Location_2' : '%s:%s%s'}" % (USER_TOKEN, service.get_name(), service.host, service.port, service.get_path())
+            res = requests.post(URL, data=service_data)
+#            print(service_data)
+        services_lock.release()
+
+        vulnerabilities_lock.acquire()
+        for vuln in vulnerabilities:
+            vuln_data = "{'chk' : '3', 'token' : '%s', 'Location_3' : '%s', 'Categoty_3' : '%s', 'Vulnerability_3': '%s', 'Description_3' : '%s', 'Evidence_3' : '%s'}" % (USER_TOKEN, vuln.location(), vuln.category.name, vuln.get_name(), vuln.explain(), vuln.evidence)
+            res = requests.post(URL, data=vuln_data)
+#            print(vuln_data)
+
+        vulnerabilities_lock.release()
+        print("\x1b[1;34m\n==============================================================================\x1b[1;m")
+        print("\x1b[1;34mIf you confirm Kube-Six report, Click This ==> http://hotsix.kro.kr/result.php\x1b[1;m")
+        print("\x1b[1;34m==============================================================================\n\n\x1b[1;m")
