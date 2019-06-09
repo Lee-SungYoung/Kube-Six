@@ -136,11 +136,11 @@ class IsVulnerableToCVEAttack(Hunter):
         api_version = self.get_api_server_version_end_point()
         global final_pods
         if api_version:
+            if self.check_cve_2019_1002101():
+            	self.publish_event(CheckCVE20191002101(final_pods))
+                final_pods = ''
             if self.check_cve_2018_1002105(api_version):
                 self.publish_event(ServerApiVersionEndPointAccessPE(self.api_server_evidence))
             if self.check_cve_2019_1002100(api_version):
                 self.publish_event(ServerApiVersionEndPointAccessDos(self.api_server_evidence))
-            if self.check_cve_2019_1002101():
-            	self.publish_event(CheckCVE20191002101(final_pods))
-                final_pods = ''
 
