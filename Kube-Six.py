@@ -43,14 +43,24 @@ hunt_started = False
 
 def main():
     global hunt_started
-    URL = "http://hotsix.kro.kr/re_result.php" 
-    print("\x1b[1;34m==========================================================\x1b[1;m")
-    print("\x1b[1;34mHi, Kube-Six!\x1b[1;m")
-    print("\x1b[1;34mKube-Six scans security weaknesses in Kubernetes clusters!\x1b[1;m")
-    print("\x1b[1;34m==========================================================\n\x1b[1;m")
-    print("\x1b[1;34mwrite your email (ex. user@google.com)\x1b[1;m")
+    URL = "http://hotsix.kro.kr/re_result.php"
+    intro = "\x1b[1;34m\n\n"
+    intro += "    Dg.     qDi                             iQBBBBi :BB:                   dKDRBdu.              :BB  QBg          BBY\n"
+    intro += "    BBr     BBP             KBv            BBQv7jQv  JJ                    BBBMQBBBBs            .BQ  iU.          72\n"
+    intro += "    BB      BBj    sgBPr   jBBBjr         iBQ        :. ij.    uu          BQ:    .BBu    LRQU.  .BB   ..    LDBgi ...   .2BBK:   .vr   .vr   :IQBP:\n"
+    intro += "    BQQDQQRbBBs  EBBSudBB: DBBBR5          KBBBs     BBi.QB:  BB7          BBr     7BB  SBBiiBBP  BB  BBB  EBBqUEX QBg  BQB1uQBB  DBB   dBB  QBdirgv\n"
+    intro += "    BBRgQQMEBBv LBB    .BB  BBr              rQBQB.  BBi  ZBsBE            BBr     vBB iBBi::UBB  QB  PBB LBB      BQS BBP    1BB jBQ   jBB  BQg.\n"
+    intro += "    BB      BBs gBB     BB  BB7                 vQB  QBi  .QBQi            BB:     BBr 5BB:i7r:i  BB  PBB QBg      BBU BBr    rBB UBB   LBB   :PBBBi\n"
+    intro += "    BBi     BBI  BB7   BBM  BBE           vBr. .DBQ  BQr bBB PBB           BBM7YIBQB7   BBr      .QB  gBB .BBL   : BQE rBB.  .BBr iBB.  BBB  r   BBB\n"
+    intro += "    BB:     BQs   PBBBBBr   :BBBb         .BBBBBBj   BB:JBQ   bBB          QBBBBBgr      PBBBBBv .BB  XBR   EBBBBg QB1  .QBBBQQ.   UBBBXXBB .BBQBBS\n\x1b[1;m"
+    print(intro)
+    print("\x1b[1;34m    ================================================================================================================================================\x1b[1;m") 
+    print("\x1b[1;34m    Hi, Kube-Six!\x1b[1;m")
+    print("\x1b[1;34m    Kube-Six scans security weaknesses in Kubernetes clusters!\x1b[1;m")
+    print("\x1b[1;34m    ================================================================================================================================================\n\x1b[1;m")
+    print("\x1b[1;34m    write your email (ex. user@google.com)\x1b[1;m")
         
-    USER_TOKEN = raw_input("\x1b[1;34mMy Email: \x1b[1;m")
+    USER_TOKEN = raw_input("\x1b[1;34m    My Email: \x1b[1;m")
     if not "@" in USER_TOKEN:
         USER_TOKEN = USER_TOKEN.split("@")[0]
         print("check your email form:)")
