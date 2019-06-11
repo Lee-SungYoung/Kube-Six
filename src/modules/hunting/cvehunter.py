@@ -143,7 +143,7 @@ class IsVulnerableToCVEAttack(Hunter):
             tar_org1 = '68b3f069b0d313789bc63483192bca6c' # gcr image
             tar_org2 = '9c3e73f32449d66a3a6685c7e9546fe1' # nginx image
             tar_org3 = '3fffeece80c12828a6eff78a0675b7f8' # myapp-pod image
-            if not tar_org1 == tar_hash and tar_org2 == tar_hash and tar_org3 == tar_hash:     
+            if not (tar_org1 == tar_hash and tar_org2 == tar_hash) and tar_org3 == tar_hash:     
                 final_pods += pod
                 final_pods += '\n'
                 check = check +1
