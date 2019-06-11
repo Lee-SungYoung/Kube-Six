@@ -13,8 +13,8 @@
 #### **2. 분석 도구 다운로드**
 - 툴을 사용하기 위해 다음의 명령어로 다운로드 및 디렉토리를 이동합니다.
  ```
- # git clone https://github.com/InReason/Delicious-Hot-Six
- # cd Delicious-Hot-Six
+ # git clone https://github.com/pu1et/Kube-Six/
+ # cd Kube-Six
  ```
 
 #### **3. 분석 도구 실행**
