@@ -1,7 +1,7 @@
 # 핫식스 맛있다
 ##### Team Name is : 핫식스 맛있다
 ###
-##### Team Members is : K-Shield Jr. 2기 - | 이건주 | 안지원 | 이성영 | 이정훈 | 권승민 |
+##### Team Members is : K-Shield Jr. 2기 - | 이건주 | 안지원 | 이성영 | 권승민 |
 ##### Tema Project Subject is : 쿠버네티스 취약점 분석 도구
 ###
 ## 쿠버네티스 취약점 분석 도구 사용 방법
@@ -37,5 +37,4 @@ Kube-Six.py (등록한 이메일)
 ##### 이건주 - rjswn0315.tistory.com
 ##### 안지원 - pu1et-panggg.tistory.com
 ##### 이성영 - https://blog.naver.com/kng03470
-##### 이정훈 - 없음
 ##### 권승민 - https://blog.naver.com/in_reasona || https://inreason.tistory.com/
